@@ -1,5 +1,5 @@
 --[[This code specify the model for SVHN dataset. This model uses the Shift based batch-normalization algorithm.
-In this file we also secify the Glorot learning parameter and which of the learnable parameter we clip ]]  
+In this file we also secify the Glorot learning parameter and which of the learnable parameter we clip ]]
 require 'cunn'
 require 'cudnn'
 require 'nn'
@@ -14,49 +14,49 @@ local model = nn.Sequential()
 
 -- Convolution Layers
 model:add(cudnnBinarySpatialConvolution(3, 64, 3, 3 ,1,1,1,1,opt.stcWeights ))
-model:add(SpatialBatchNormalizationShiftPow2(64))
+model:add(SpatialBatchNormalizationShiftPow2(64, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 model:add(cudnnBinarySpatialConvolution(64, 64, 3, 3,1,1,1,1,opt.stcWeights ))
 model:add(cudnn.SpatialMaxPooling(2, 2))
-model:add(SpatialBatchNormalizationShiftPow2(64))
+model:add(SpatialBatchNormalizationShiftPow2(64, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 
 model:add(cudnnBinarySpatialConvolution(64, 128, 3, 3 ,1,1,1,1,opt.stcWeights ))
-model:add(SpatialBatchNormalizationShiftPow2(128))
+model:add(SpatialBatchNormalizationShiftPow2(128, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 model:add(cudnnBinarySpatialConvolution(128, 128, 3, 3 ,1,1,1,1,opt.stcWeights ))
 model:add(cudnn.SpatialMaxPooling(2, 2))
-model:add(SpatialBatchNormalizationShiftPow2(128))
+model:add(SpatialBatchNormalizationShiftPow2(128, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 
 model:add(cudnnBinarySpatialConvolution(128, 256, 3, 3,1,1,1,1,opt.stcWeights ))
-model:add(SpatialBatchNormalizationShiftPow2(256))
+model:add(SpatialBatchNormalizationShiftPow2(256, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 model:add(cudnnBinarySpatialConvolution(256, 256, 3, 3,1,1,1,1,opt.stcWeights ))
 model:add(cudnn.SpatialMaxPooling(2, 2))
-model:add(SpatialBatchNormalizationShiftPow2(256))
+model:add(SpatialBatchNormalizationShiftPow2(256, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 model:add(nn.View(256*4*4))
 
 model:add(BinaryLinear(256*4*4,numHid,opt.stcWeights))
-model:add(BatchNormalizationShiftPow2(numHid))
+model:add(BatchNormalizationShiftPow2(numHid, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 
 model:add(BinaryLinear(numHid,numHid,opt.stcWeights))
-model:add(BatchNormalizationShiftPow2(numHid))
+model:add(BatchNormalizationShiftPow2(numHid, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 

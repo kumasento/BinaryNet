@@ -8,7 +8,7 @@
 
 local BatchNormalizationShiftPow2,parent = torch.class('BatchNormalizationShiftPow2', 'nn.Module')
 
-function BatchNormalizationShiftPow2:__init(nOutput, eps, momentum, affine)
+function BatchNormalizationShiftPow2:__init(nOutput, runningVal, eps, momentum, affine)
    parent.__init(self)
    assert(nOutput and type(nOutput) == 'number',
           'Missing argument #1: dimensionality of input. ')
@@ -23,7 +23,7 @@ function BatchNormalizationShiftPow2:__init(nOutput, eps, momentum, affine)
    self.eps = eps or 1e-5
    self.train = true
    self.momentum = momentum or 0.125
-   self.runningVal = false
+   self.runningVal = runningVal or true
    self.running_mean = torch.zeros(nOutput)
    self.running_std = torch.ones(nOutput)
    self.running_std_ap2 = torch.ones(nOutput)
@@ -65,7 +65,6 @@ function BatchNormalizationShiftPow2:updateOutput(input)
    self.normalizedSign:resizeAs(input)
    self.output:resizeAs(input)
    self.gradInput:resizeAs(input)
-   self.runningVal = false
    if self.train == false and self.runningVal == true then
      self.output:copy(input)
      self.buffer:repeatTensor(self.running_mean, nBatch, 1)

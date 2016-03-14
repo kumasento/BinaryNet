@@ -20,7 +20,7 @@ cmd:text('==>Options')
 cmd:text('===>Model And Training Regime')
 cmd:option('-modelsFolder',       './Models/',            'Models Folder')
 cmd:option('-network',            'Model.lua',            'Model file - must return valid network.')
-cmd:option('-LR',                 2^-5,                   'learning rate')
+cmd:option('-LR',                 2^-6,                   'learning rate')
 cmd:option('-LRDecay',            0,                      'learning rate decay (in # samples)')
 cmd:option('-weightDecay',        0.0,                    'L2 penalty on the weights')
 cmd:option('-momentum',           0.0,                    'momentum')
@@ -28,6 +28,7 @@ cmd:option('-batchSize',          200,                    'batch size')
 cmd:option('-stcNeurons',         true,                   'use stochastic binarization for the neurons')
 cmd:option('-stcWeights',         false,                  'use stochastic binarization for the weights')
 cmd:option('-optimization',       'adam',                  'optimization method')
+cmd:option('-runningVal',         false,                    'use running mean and std')
 cmd:option('-epoch',              -1,                     'number of epochs to train, -1 for unbounded')
 
 cmd:text('===>Platform Optimization')
@@ -58,8 +59,10 @@ opt = cmd:parse(arg or {})
 opt.network = opt.modelsFolder .. paths.basename(opt.network, '.lua')
 opt.save = paths.concat('./Results', opt.save)
 opt.preProcDir = paths.concat(opt.preProcDir, opt.dataset .. '/')
-opt.LRDecay=torch.pow((2e-6/opt.LR),(1./500));  --2e-6
 
+-- If you choose to use exponentialy decaying learning rate use uncomment this line
+--opt.LRDecay=torch.pow((2e-6/opt.LR),(1./500));
+--
 os.execute('mk1ir -p ' .. opt.preProcDir)
 torch.setnumthreads(opt.threads)
 

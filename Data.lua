@@ -30,7 +30,9 @@ if Dataset =='Cifar100' then
     TestData=torch.load(file_test)
   else
     if paths.dirp(PreProcDir)==false then
-       sys.execute('mkdir PreProcData/Cifar100')
+      sys.execute('cd PreProcData')
+      sys.execute('mkdir Cifar100')
+      sys.execute('cd ..')
     end
     input_preprocess = {}
     table.insert(input_preprocess, dp.ZCA())
@@ -53,11 +55,13 @@ elseif Dataset == 'Cifar10' then
       TestData=torch.load(file_test)
     else
       if paths.dirp(PreProcDir)==false then
-         sys.execute('mkdir PreProcData/Cifar10')
+        sys.execute('cd PreProcData')
+        sys.execute('mkdir Cifar10')
+        sys.execute('cd ..')
       end
       input_preprocess = {}
       table.insert(input_preprocess, dp.ZCA())
-      ds = dp.Cifar10{scale={0,1},valid_ratio=0.1} --,input_preprocess = input_preprocess}  scale={0,1},
+      ds = dp.Cifar10{scale={0,1},valid_ratio=0.01} --,input_preprocess = input_preprocess}  scale={0,1},
       ValidData = {data=ds:validSet():inputs():input():float(), label=ds:validSet():targets():input():clone():byte() }
       TrainData = {data=ds:trainSet():inputs():input():float(), label=ds:trainSet():targets():input():byte() }
       TestData  = {data=ds:testSet():inputs():input():float(), label=ds:testSet():targets():input():byte()  }
@@ -74,9 +78,6 @@ elseif Dataset == 'STL10' then
     TestData.label = TestData.label:add(-1):byte()
     TrainData.label = TrainData.label:add(-1):byte()
 elseif Dataset == 'MNIST' then
-  if paths.dirp(PreProcDir)==false then
-     sys.execute('mkdir PreProcData/MNIST')
-  end
   local file_valid = paths.concat(PreProcDir, format .. '_valid.t7')
   local file_train = paths.concat(PreProcDir, format .. '_train.t7')
   local file_test = paths.concat(PreProcDir, format .. '_test.t7')
@@ -85,7 +86,12 @@ elseif Dataset == 'MNIST' then
     TrainData=torch.load(file_train)
     TestData=torch.load(file_test)
   else
-    ds = dp.Mnist{} 
+    if paths.dirp(PreProcDir)==false then
+      sys.execute('cd PreProcData')
+      sys.execute('mkdir MNIST')
+      sys.execute('cd ..')
+    end
+    ds = dp.Mnist{scale={0,1}}
     ValidData = {data=ds:validSet():inputs():input():clone():float(), label=ds:validSet():targets():input():clone():byte() }
     TrainData = {data=ds:trainSet():inputs():input():float(), label=ds:trainSet():targets():input():byte() }
     TestData  = {data=ds:testSet():inputs():input():float() , label=ds:testSet():targets():input():byte()  }
@@ -106,12 +112,14 @@ elseif Dataset == 'SVHN' then
       TestData=torch.load(LCNfile_test)
     else
       if paths.dirp(PreProcDir)==false then
-         sys.execute('mkdir PreProcData/SVHN')
+        sys.execute('cd PreProcData')
+        sys.execute('mkdir SVHN')
+        sys.execute('cd ..')
       end
       local input_preprocess = {}
       table.insert(input_preprocess, dp.GCN{batch_size=5000,use_std=true,sqrt_bias=10})
       table.insert(input_preprocess, dp.LeCunLCN{kernel_size=9,divide_by_std=true,batch_size=5000,progress=true}) --,kernel_size=31,kernel_std=32})
-      ds = dp.Svhn{input_preprocess = input_preprocess}
+      ds = dp.Svhn{scale={0,1}, input_preprocess = input_preprocess}
       ValidData = {data=ds:validSet():inputs():input():float(), label=ds:validSet():targets():input():byte() }; ValidData.data:div( ValidData.data:max())
       TrainData = {data=ds:trainSet():inputs():input():float(), label=ds:trainSet():targets():input():byte() }; TrainData.data:div( TrainData.data:max())
       TestData  = {data=ds:testSet():inputs():input():float(), label=ds:testSet():targets():input():byte() };  TestData.data:div( TestData.data:max())

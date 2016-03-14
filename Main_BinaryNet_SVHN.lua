@@ -27,6 +27,7 @@ cmd:option('-batchSize',          200,                    'batch size')
 cmd:option('-stcNeurons',         true,                    'batch size')
 cmd:option('-stcWeights',         false,                    'batch size')
 cmd:option('-optimization',       'adam',                  'optimization method')
+cmd:option('-runningVal',         true,                    'use running mean and std')
 cmd:option('-epoch',              -1,                     'number of epochs to train, -1 for unbounded')
 
 cmd:text('===>Platform Optimization')
@@ -52,11 +53,16 @@ cmd:option('-preProcDir',         './PreProcData/',       'Data for pre-processi
 cmd:text('===>Misc')
 cmd:option('-visualize',          1,                      'visualizing results')
 
+torch.manualSeed(432)
 opt = cmd:parse(arg or {})
 opt.network = opt.modelsFolder .. paths.basename(opt.network, '.lua')
 opt.save = paths.concat('./Results', opt.save)
 opt.preProcDir = paths.concat(opt.preProcDir, opt.dataset .. '/')
 
+
+-- If you choose to use exponentialy decaying learning rate use uncomment this line
+--opt.LRDecay=torch.pow((2e-6/opt.LR),(1./500));
+--
 
 os.execute('mk1ir -p ' .. opt.preProcDir)
 torch.setnumthreads(opt.threads)

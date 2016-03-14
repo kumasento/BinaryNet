@@ -18,9 +18,6 @@ To install all dependencies (assuming torch is installed) use:
 luarocks install https://raw.githubusercontent.com/eladhoffer/eladtools/master/eladtools-scm-1.rockspec
 luarocks install https://raw.githubusercontent.com/eladhoffer/DataProvider.torch/master/dataprovider-scm-1.rockspec
 luarocks install dp
-cd BinaryNet
-mkdir PreProcData
-
 ```
 
 ##Training
@@ -45,6 +42,7 @@ th Main_BinaryNet_MNIST.lua -network BinaryNet_MNIST_Model
 |stcNeurons       |  true                | using stochastic binarization for the neurons or not
 |stcWeights       |  false               | using stochastic binarization for the weights or not
 |optimization     |  adam                | optimization method
+|runningVal       |  true                | use running mean and std
 |epoch            |  -1                  | number of epochs to train (-1 for unbounded)
 |threads          |  8                   | number of threads
 |type             |  cuda                | float or cuda

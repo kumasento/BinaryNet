@@ -6,7 +6,7 @@
    --]]
 local SpatialBatchNormalizationShiftPow2,parent = torch.class('SpatialBatchNormalizationShiftPow2', 'nn.Module')
 
-function SpatialBatchNormalizationShiftPow2:__init(nFeature, eps, momentum)
+function SpatialBatchNormalizationShiftPow2:__init(nFeature, runningVal, eps, momentum)
    parent.__init(self)
    assert(nFeature and type(nFeature) == 'number',
           'Missing argument #1: Number of feature planes. ' ..
@@ -14,7 +14,7 @@ function SpatialBatchNormalizationShiftPow2:__init(nFeature, eps, momentum)
    self.eps = eps or 1e-5
    self.train = true
    self.momentum = momentum or 0.125
-   self.runningVal = false
+   self.runningVal = runningVal or true
    self.running_mean = torch.Tensor()
    self.running_std = torch.Tensor()
    self.running_std_ap2 = torch.Tensor()
