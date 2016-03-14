@@ -30,9 +30,7 @@ if Dataset =='Cifar100' then
     TestData=torch.load(file_test)
   else
     if paths.dirp(PreProcDir)==false then
-      sys.execute('cd PreProcData')
-      sys.execute('mkdir Cifar100')
-      sys.execute('cd ..')
+       sys.execute('mkdir PreProcData/Cifar100')
     end
     input_preprocess = {}
     table.insert(input_preprocess, dp.ZCA())
@@ -55,9 +53,7 @@ elseif Dataset == 'Cifar10' then
       TestData=torch.load(file_test)
     else
       if paths.dirp(PreProcDir)==false then
-        sys.execute('cd PreProcData')
-        sys.execute('mkdir Cifar10')
-        sys.execute('cd ..')
+         sys.execute('mkdir PreProcData/Cifar10')
       end
       input_preprocess = {}
       table.insert(input_preprocess, dp.ZCA())
@@ -78,6 +74,9 @@ elseif Dataset == 'STL10' then
     TestData.label = TestData.label:add(-1):byte()
     TrainData.label = TrainData.label:add(-1):byte()
 elseif Dataset == 'MNIST' then
+  if paths.dirp(PreProcDir)==false then
+     sys.execute('mkdir PreProcData/MNIST')
+  end
   local file_valid = paths.concat(PreProcDir, format .. '_valid.t7')
   local file_train = paths.concat(PreProcDir, format .. '_train.t7')
   local file_test = paths.concat(PreProcDir, format .. '_test.t7')
@@ -86,11 +85,6 @@ elseif Dataset == 'MNIST' then
     TrainData=torch.load(file_train)
     TestData=torch.load(file_test)
   else
-    if paths.dirp(PreProcDir)==false then
-      sys.execute('cd PreProcData')
-      sys.execute('mkdir MNIST')
-      sys.execute('cd ..')
-    end
     ds = dp.Mnist{} 
     ValidData = {data=ds:validSet():inputs():input():clone():float(), label=ds:validSet():targets():input():clone():byte() }
     TrainData = {data=ds:trainSet():inputs():input():float(), label=ds:trainSet():targets():input():byte() }
@@ -112,9 +106,7 @@ elseif Dataset == 'SVHN' then
       TestData=torch.load(LCNfile_test)
     else
       if paths.dirp(PreProcDir)==false then
-        sys.execute('cd PreProcData')
-        sys.execute('mkdir SVHN')
-        sys.execute('cd ..')
+         sys.execute('mkdir PreProcData/SVHN')
       end
       local input_preprocess = {}
       table.insert(input_preprocess, dp.GCN{batch_size=5000,use_std=true,sqrt_bias=10})
