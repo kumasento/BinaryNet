@@ -34,7 +34,7 @@ cmd:option('-epoch',              -1,                     'number of epochs to t
 cmd:text('===>Platform Optimization')
 cmd:option('-threads',            8,                      'number of threads')
 cmd:option('-type',               'cuda',                 'float or cuda')
-cmd:option('-devid',              2,                      'device ID (if using CUDA)')
+cmd:option('-devid',              1,                      'device ID (if using CUDA)')
 cmd:option('-nGPU',               1,                      'num of gpu devices used')
 cmd:option('-constBatchSize',     false,                  'do not allow varying batch sizes - e.g for ccn2 kernel')
 
