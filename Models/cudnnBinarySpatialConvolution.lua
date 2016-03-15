@@ -12,17 +12,14 @@ autotunerCache[3] = {} -- backwardData
 
 function cudnnBinarySpatialConvolution:binarized(trainFlagt)
   self.weightOrg:copy(self.weight);
---  binaryFlag=true
   if not trainFlag and  self.stcWeights then
     self.weightB:copy(weightOrg);
   else
     self.weightB:copy(self.weight):add(1):div(2):clamp(0,1)
 
     if not stcWeights then
-      --print('In Binary weight conv')
       self.weightB:round():mul(2):add(-1)
     else
-      print('In Stc weight conv')
       self.maskStc=self.weightB-self.randmat:rand(self.randmat:size())
       self.weightB:copy(self.maskStc:sign())
 
@@ -125,7 +122,6 @@ function cudnnBinarySpatialConvolution:updateOutput(input)
     self.weightOrg:copy(self.weight)
     self.weightB = self:binarized(self.train)
     self.weight:copy(self.weightB)
-    --print(self.weight:max(),self.weight:min())
     for g = 0, self.groups - 1 do
         -- stream-parallelize if appropriate
         if self.groups > 1 and prevStream == 0 then
@@ -165,7 +161,6 @@ function cudnnBinarySpatialConvolution:updateGradInput(input, gradOutput)
     assert(gradOutput:isContiguous(), 'gradOutput has to be contiguous')
     if not self.weightDesc then self:resetWeightDescriptors() end
     self:createIODescriptors(input)
-    local weightOrg=self.weight:clone()
     self.weight:copy(self.weightB)
 
     for g = 0,self.groups - 1 do
@@ -179,7 +174,7 @@ function cudnnBinarySpatialConvolution:updateGradInput(input, gradOutput)
                  zero:data(),
                  self.iDesc[0], self.gradInput:data() + g*self.input_offset);
     end
-    self.weight:copy(weightOrg)
+    self.weight:copy(self.weightOrg)
     return self.gradInput
 end
 function cudnnBinarySpatialConvolution:accGradParameters(input, gradOutput, scale)
