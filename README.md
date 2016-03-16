@@ -23,7 +23,11 @@ luarocks install unsup
 ```
 
 ##Training
-You can start training using:
+Create pre-processing folder:
+cd BinaryNet
+mkdir PreProcData
+
+Start training using:
 ```lua
 th Main_BinaryNet_Cifar10.lua -network BinaryNet_Cifar10_Model
 or,
