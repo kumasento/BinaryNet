@@ -1,31 +1,29 @@
-local BinarySpatialConvolution, parent = torch.class('BinarySpatialConvolution', 'nn.Module')
+local BinarySpatialConvolution, parent = torch.class('BinarySpatialConvolution', 'nn.SpatialConvolution')
 
 function BinarySpatialConvolution:__init(nInputPlane, nOutputPlane, kW, kH, dW, dH, padW, padH)
-   parent.__init(self)
+  local delayedReset = self.reset
+  self.reset = function() end
+  parent.__init(self, nInputPlane, nOutputPlane, kW, kH, dW, dH)
+  self.reset = delayedReset
+  self.padW = padW or 0
+  self.padH = padH or 0
+  self.stcWeights = stcWeights or false
+  self.groups = groups or 1
+  assert(nInputPlane % self.groups == 0,
+         'nInputPlane should be divisible by nGroups')
+  assert(nOutputPlane % self.groups == 0,
+         'nOutputPlane should be divisible by nGroups')
+  self.weight = torch.Tensor(nOutputPlane, nInputPlane/self.groups, kW, kH)
+  self.weightB = torch.Tensor(nOutputPlane, nInputPlane/self.groups, kW, kH)
+  self.weightOrg = torch.Tensor(nOutputPlane, nInputPlane/self.groups, kW, kH)
+  self.randmat = torch.Tensor(nOutputPlane, nInputPlane/self.groups, kW, kH)
+  self.maskStc = torch.Tensor(nOutputPlane, nInputPlane/self.groups, kW, kH)
+  self:reset()
+  -- should nil for serialization, the reset will still work
+  self.reset = nil
+  self.iSize = torch.LongStorage(4):fill(0)
 
-   dW = dW or 1
-   dH = dH or 1
 
-   self.nInputPlane = nInputPlane
-   self.nOutputPlane = nOutputPlane
-   self.kW = kW
-   self.kH = kH
-
-   self.dW = dW
-   self.dH = dH
-   self.padW = padW or 0
-   self.padH = padH or self.padW
-
-   self.weight = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.weightB = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.weightOrg = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.randmat = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.maskStc = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.bias = torch.Tensor(nOutputPlane)
-   self.gradWeight = torch.Tensor(nOutputPlane, nInputPlane, kH, kW)
-   self.gradBias = torch.Tensor(nOutputPlane)
-
-   self:reset()
 end
 
 function BinarySpatialConvolution:reset(stdv)
@@ -50,23 +48,26 @@ function BinarySpatialConvolution:reset(stdv)
      end
   end
 end
+
 function BinarySpatialConvolution:binarized(trainFlag)
- self.weightOrg:copy(self.weight);
- if not trainFlag and  self.stcWeights then
-   self.weightB:copy(weightOrg);
- else
-   self.weightB:copy(self.weight):add(1):div(2):clamp(0,1)
+  self.weightOrg:copy(self.weight)
+  self.binaryFlag = true
+  if not self.binaryFlag then
+    self.weight:copy(self.weightOrg)
+  else
+    self.weightB:copy(self.weight):add(1):div(2):clamp(0,1)
 
-   if not stcWeights then
-     self.weightB:round():mul(2):add(-1)
-   else
-     self.maskStc=self.weightB-self.randmat:rand(self.randmat:size())
-     self.weightB:copy(self.maskStc:sign())
-   end
- end
+    if not self.stcWeights or not trainFlag then
+      self.weightB:round():mul(2):add(-1)
+    else
+      self.maskStc=self.weightB-self.randmat:rand(self.randmat:size())
+      self.weightB:copy(self.maskStc)
 
- return  self.weightB
- end
+    end
+  end
+
+  return  self.weightB
+end
 
 local function backCompatibility(self)
    self.finput = self.finput or self.weight.new()
@@ -88,19 +89,19 @@ local function backCompatibility(self)
 end
 
 local function makeContiguous(self, input, gradOutput)
-   if not input:isContiguous() then
-      self._input = self._input or input.new()
-      self._input:resizeAs(input):copy(input)
-      input = self._input
-   end
-   if gradOutput then
-      if not gradOutput:isContiguous() then
-	 self._gradOutput = self._gradOutput or gradOutput.new()
-	 self._gradOutput:resizeAs(gradOutput):copy(gradOutput)
-	 gradOutput = self._gradOutput
-      end
-   end
-   return input, gradOutput
+  if not input:isContiguous() then
+    self._input = self._input or input.new()
+    self._input:resizeAs(input):copy(input)
+    input = self._input
+ end
+ if gradOutput then
+    if not gradOutput:isContiguous() then
+ self._gradOutput = self._gradOutput or gradOutput.new()
+ self._gradOutput:resizeAs(gradOutput):copy(gradOutput)
+ gradOutput = self._gradOutput
+    end
+ end
+ return input, gradOutput
 end
 
 -- function to re-view the weight layout in a way that would make the MM ops happy
@@ -191,15 +192,7 @@ function BinarySpatialConvolution:type(type,tensorCache)
 end
 
 function BinarySpatialConvolution:__tostring__()
-   local s = string.format('%s(%d -> %d, %dx%d', torch.type(self),
-         self.nInputPlane, self.nOutputPlane, self.kW, self.kH)
-   if self.dW ~= 1 or self.dH ~= 1 or self.padW ~= 0 or self.padH ~= 0 then
-     s = s .. string.format(', %d,%d', self.dW, self.dH)
-   end
-   if (self.padW or self.padH) and (self.padW ~= 0 or self.padH ~= 0) then
-     s = s .. ', ' .. self.padW .. ',' .. self.padH
-   end
-   return s .. ')'
+   return parent.__tostring__(self)
 end
 
 function BinarySpatialConvolution:clearState()

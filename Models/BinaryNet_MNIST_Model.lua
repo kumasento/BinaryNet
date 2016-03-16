@@ -4,23 +4,36 @@ require 'cunn'
 require 'cudnn'
 require 'nn'
 require './BinaryLinear.lua'
-require './BatchNormalizationShiftPow2'
+
 require './BinarizedNeurons'
+if opt.type='cuda' then
+  require 'cunn'
+  require 'cudnn'
+end
+
+local BatchNormalization;
+if opt.SBN == true then
+  require './BatchNormalizationShiftPow2'
+  BatchNormalization = BatchNormalizationShiftPow2
+else
+  BatchNormalization = nn.BatchNormalization
+end
+
 local model = nn.Sequential()
 local numHid =2048
 -- Convolution Layers
 model:add(nn.View(-1,784))
 
 model:add(BinaryLinear(784,numHid))
-model:add(BatchNormalizationShiftPow2(numHid, opt.runningVal))
+model:add(BatchNormalization(numHid, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 model:add(BinaryLinear(numHid,numHid,opt.stcWeights))
-model:add(BatchNormalizationShiftPow2(numHid, opt.runningVal))
+model:add(BatchNormalization(numHid, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 model:add(BinaryLinear(numHid,numHid,opt.stcWeights))
-model:add(BatchNormalizationShiftPow2(numHid, opt.runningVal))
+model:add(BatchNormalization(numHid, opt.runningVal))
 model:add(nn.HardTanh())
 model:add(BinarizedNeurons(opt.stcNeurons))
 model:add(BinaryLinear(numHid,10,opt.stcWeights))
