@@ -24,8 +24,10 @@ luarocks install unsup
 
 ##Training
 Create pre-processing folder:
+```lua
 cd BinaryNet
 mkdir PreProcData
+```
 
 Start training using:
 ```lua
