@@ -27,6 +27,7 @@ cmd:option('-batchSize',          100,                    'batch size')
 cmd:option('-stcNeurons',         true,                    'batch size')
 cmd:option('-stcWeights',         false,                    'batch size')
 cmd:option('-optimization',       'adam',                  'optimization method')
+cmd:option('-SBN',                true,                   'shift based batch-normalization')
 cmd:option('-runningVal',         true,                    'use running mean and std')
 cmd:option('-epoch',              -1,                     'number of epochs to train, -1 for unbounded')
 

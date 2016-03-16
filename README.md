@@ -1,6 +1,6 @@
 Deep Networks on classification tasks using Torch
 =================================================
-This is a complete training example for BinaryNets using Binary-Backpropagation algorithm as explained in 
+This is a complete training example for BinaryNets using Binary-Backpropagation algorithm as explained in
 "Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1, Matthieu Courbariaux, Itay Hubara, Daniel Soudry, Ran El-Yaniv, Yoshua Bengio'
 on following datasets: Cifar10/100, SVHN, MNIST
 
@@ -12,21 +12,23 @@ We use dp library to extract all the data please view installation section
 * "DataProvider.torch" (https://github.com/eladhoffer/DataProvider.torch) for DataProvider class.
 * "cudnn.torch" (https://github.com/soumith/cudnn.torch) for faster training. Can be avoided by changing "cudnn" to "nn" in models.
 * "dp" (https://github.com/nicholas-leonard/dp.git) for data extraction
+* "unsup" (https://github.com/koraykv/unsup.git) for data pre-processing
 
 To install all dependencies (assuming torch is installed) use:
 ```bash
-luarocks install https://raw.githubusercontent.com/eladhoffer/eladtools/master/eladtools-scm-1.rockspec
 luarocks install https://raw.githubusercontent.com/eladhoffer/DataProvider.torch/master/dataprovider-scm-1.rockspec
+luarocks install cudnn
 luarocks install dp
+luarocks install unsup
 ```
 
 ##Training
 You can start training using:
 ```lua
-th Main_BinaryNet_Cifar10.lua -network BinaryNet_Cifar10_Model 
+th Main_BinaryNet_Cifar10.lua -network BinaryNet_Cifar10_Model
 or,
 ```lua
-th Main_BinaryNet_MNIST.lua -network BinaryNet_MNIST_Model 
+th Main_BinaryNet_MNIST.lua -network BinaryNet_MNIST_Model
 ```
 
 ##Additional flags
@@ -42,7 +44,8 @@ th Main_BinaryNet_MNIST.lua -network BinaryNet_MNIST_Model
 |stcNeurons       |  true                | using stochastic binarization for the neurons or not
 |stcWeights       |  false               | using stochastic binarization for the weights or not
 |optimization     |  adam                | optimization method
-|runningVal       |  true                | use running mean and std
+|SBN              |  true                | use shift based batch-normalization or not
+|runningVal       |  true                | use running mean and std or not
 |epoch            |  -1                  | number of epochs to train (-1 for unbounded)
 |threads          |  8                   | number of threads
 |type             |  cuda                | float or cuda

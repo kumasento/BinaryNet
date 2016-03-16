@@ -1,5 +1,7 @@
 --[[ An implementation of Adam http://arxiv.org/pdf/1412.6980.pdf
 
+Note that this function perform the weight cliping as well
+
 ARGS:
 
 - 'opfunc' : a function that takes a single input (X), the point
@@ -54,16 +56,14 @@ function adam_binary_clip_b(opfunc, x, config, state)
     local biasCorrection2 = 1 - beta2^state.t
     local stepSize = lr * math.sqrt(biasCorrection2)/biasCorrection1
     -- (2) update x
+    local tmp=torch.zeros(x:size())
+    if opt.type == 'cuda' then
+      tmp=tmp:cuda()
+    end
 
-    --x:addcdiv(-stepSize, state.m, state.denom)
-    local tmp=torch.zeros(x:size()):cuda()
-    --print(tmp:size(),state.m:size())
     tmp:addcdiv(1, state.m, state.denom)
     x:addcmul(-stepSize, tmp, GLRvec)
     x[clipV:eq(1)]=x[clipV:eq(1)]:clamp(-1,1)
-    --x=x:clamp(-1,1)
 
-    --print(x:min(),x:mean())
-    -- return x*, f(x) before optimization
     return x, {fx}
 end

@@ -27,8 +27,9 @@ cmd:option('-momentum',           0.0,                    'momentum')
 cmd:option('-batchSize',          200,                    'batch size')
 cmd:option('-stcNeurons',         true,                   'use stochastic binarization for the neurons')
 cmd:option('-stcWeights',         false,                  'use stochastic binarization for the weights')
-cmd:option('-optimization',       'adam',                  'optimization method')
-cmd:option('-runningVal',         false,                    'use running mean and std')
+cmd:option('-optimization',       'adam',                 'optimization method')
+cmd:option('-SBN',                true,                   'shift based batch-normalization')
+cmd:option('-runningVal',         false,                  'use running mean and std')
 cmd:option('-epoch',              -1,                     'number of epochs to train, -1 for unbounded')
 
 cmd:text('===>Platform Optimization')
@@ -213,7 +214,10 @@ local function Forward(Data, train)
     y = model:forward(x)
     one_hot_yt=torch.zeros(yt:size(1),10)
     one_hot_yt:scatter(2, yt:long():view(-1,1), 1)
-    one_hot_yt=one_hot_yt:mul(2):float():add(-1):cuda()
+    one_hot_yt=one_hot_yt:mul(2):float():add(-1)
+    if opt.type == 'cuda' then
+      one_hot_yt=one_hot_yt:cuda()
+    end
 
     currLoss = loss:forward(y,one_hot_yt)
     if train then
@@ -223,7 +227,7 @@ local function Forward(Data, train)
         model:backward(x, dE_dy)
         return currLoss, Gradients
       end
-       --_G.optim[opt.optimization](feval, Weights, optimState)
+       --_G.optim[opt.optimization](feval, Weights, optimState) -- If you choose to use different optimization remember to clip the weights
        adaMax_binary_clip_shift(feval, Weights, optimState)
     end
 

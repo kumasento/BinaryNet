@@ -1,7 +1,7 @@
 --[[ An implementation of Shift based AdaMax based on  http://arxiv.org/pdf/1412.6980.pdf as described the paper:
    "Binarized Neural Networks: Training Deep Neural Networks with Weights and Activations Constrained to +1 or -1, Matthieu Courbariaux, Itay Hubara, Daniel Soudry, Ran El-Yaniv, Yoshua Bengio'
 
-Note that this function perform the weight cliping as well 
+Note that this function perform the weight cliping as well
 
 ARGS:
 
@@ -56,8 +56,11 @@ function adaMax_binary_clip_shift(opfunc, x, config, state)
 
     stepSize=math.pow(2,torch.round(math.log(stepSize)/(math.log(2))))
     -- (2) update x
+    local tmp=torch.zeros(x:size())
+    if opt.type == 'cuda' then
+      tmp=tmp:cuda()
+    end
 
-    local tmp=torch.zeros(x:size()):cuda()
 
     state.v:copy(torch.pow(2,torch.round(torch.log(state.v):div(math.log(2)))))
     state.v:add(epsilon)
