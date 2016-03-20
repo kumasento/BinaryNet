@@ -1,12 +1,10 @@
 --[[This code specify the model for MNIST dataset. This model uses the Shift based batch-normalization algorithm.
 In this file we also secify the Glorot learning parameter and which of the learnable parameter we clip ]]
-require 'cunn'
-require 'cudnn'
 require 'nn'
 require './BinaryLinear.lua'
 
 require './BinarizedNeurons'
-if opt.type='cuda' then
+if opt.type=='cuda' then
   require 'cunn'
   require 'cudnn'
 end
