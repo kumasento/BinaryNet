@@ -57,7 +57,7 @@ elseif Dataset == 'Cifar10' then
       end
       input_preprocess = {}
       table.insert(input_preprocess, dp.ZCA())
-      ds = dp.Cifar10{scale={0,1},valid_ratio=0.01} --,input_preprocess = input_preprocess}  scale={0,1},
+      ds = dp.Cifar10{scale={0,1},valid_ratio=0.1,input_preprocess = input_preprocess} --,input_preprocess = input_preprocess}  scale={0,1},
       ValidData = {data=ds:validSet():inputs():input():float(), label=ds:validSet():targets():input():clone():byte() }
       TrainData = {data=ds:trainSet():inputs():input():float(), label=ds:trainSet():targets():input():byte() }
       TestData  = {data=ds:testSet():inputs():input():float(), label=ds:testSet():targets():input():byte()  }
