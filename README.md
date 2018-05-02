@@ -37,7 +37,7 @@ or,
 th Main_BinaryNet_MNIST.lua -network BinaryNet_MNIST_Model
 ```
 
-##Additional flags
+## Additional flags
 
 |Flag             | Default Value        |Description
 |:----------------|:--------------------:|:----------------------------------------------
